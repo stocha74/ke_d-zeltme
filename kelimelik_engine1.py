@@ -943,14 +943,14 @@ def kelime_kontrol_final(kelime, x_koord, y_koord, orientation , board_old , har
             elif tahta_puanlari2[y_koord1,x_koord1]==3:
                 kelime_deger=kelime_deger+harf_puanlari[a]*2
                 if len(str(olusan_kelimeler[q]))!=1:     #EĞER KOYULAN HARF , TEK HARFLİ ALTERNATİF KELİME OLARAK YER ALMIYORSA
-                    alternatif_kelimeler_puan=alternatif_kelimeler_puan+puanlardizisi[q]
+                    alternatif_kelimeler_puan=alternatif_kelimeler_puan+puanlardizisi[q]+harf_puanlari[a]*2
                 else:    #EĞER KOYULAN HARF , TEK HARFLİ ALTERNATİF KELİME OLARAK YER ALIYORSA
                     alternatif_kelimeler_puan=alternatif_kelimeler_puan
                 #tahta_puanlari2[y_koord1,x_koord1]=0
             elif tahta_puanlari2[y_koord1,x_koord1]==2:
                 kelime_deger=kelime_deger+harf_puanlari[a]*1
                 if len(str(olusan_kelimeler[q]))!=1:     #EĞER KOYULAN HARF , TEK HARFLİ ALTERNATİF KELİME OLARAK YER ALMIYORSA
-                    alternatif_kelimeler_puan=alternatif_kelimeler_puan+puanlardizisi[q]
+                    alternatif_kelimeler_puan=alternatif_kelimeler_puan+puanlardizisi[q]+harf_puanlari[a]*1
                 else:    #EĞER KOYULAN HARF , TEK HARFLİ ALTERNATİF KELİME OLARAK YER ALIYORSA
                     alternatif_kelimeler_puan=alternatif_kelimeler_puan
                 #tahta_puanlari2[y_koord1,x_koord1]=0
@@ -996,14 +996,14 @@ def kelime_kontrol_final(kelime, x_koord, y_koord, orientation , board_old , har
             elif tahta_puanlari2[y_koord1,x_koord1]==3:
                 kelime_deger=kelime_deger+harf_puanlari[a]*2
                 if len(str(olusan_kelimeler[q]))!=1:     #EĞER KOYULAN HARF , TEK HARFLİ ALTERNATİF KELİME OLARAK YER ALMIYORSA
-                    alternatif_kelimeler_puan=alternatif_kelimeler_puan+puanlardizisi[q]
+                    alternatif_kelimeler_puan=alternatif_kelimeler_puan+puanlardizisi[q]+harf_puanlari[a]*2
                 else:    #EĞER KOYULAN HARF , TEK HARFLİ ALTERNATİF KELİME OLARAK YER ALIYORSA
                     alternatif_kelimeler_puan=alternatif_kelimeler_puan
                 #tahta_puanlari2[y_koord1,x_koord1]=0
             elif tahta_puanlari2[y_koord1,x_koord1]==2:
                 kelime_deger=kelime_deger+harf_puanlari[a]*1
                 if len(str(olusan_kelimeler[q]))!=1:     #EĞER KOYULAN HARF , TEK HARFLİ ALTERNATİF KELİME OLARAK YER ALMIYORSA
-                    alternatif_kelimeler_puan=alternatif_kelimeler_puan+puanlardizisi[q]
+                    alternatif_kelimeler_puan=alternatif_kelimeler_puan+puanlardizisi[q]+harf_puanlari[a]*1
                 else:    #EĞER KOYULAN HARF , TEK HARFLİ ALTERNATİF KELİME OLARAK YER ALIYORSA
                     alternatif_kelimeler_puan=alternatif_kelimeler_puan
                 #tahta_puanlari2[y_koord1,x_koord1]=0
