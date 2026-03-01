@@ -86,6 +86,13 @@ def _kelime_can_be_formed_with_jokers(word, letters_counter, joker_count):
     return True
 
 
+def _normalize_input_word(word):
+    """Kullanıcı/dataset kaynaklı kelimeleri temizler (boşlukları atar, büyük harfe çevirir)."""
+    if word is None:
+        return ""
+    return "".join(ch for ch in str(word).upper() if ch.strip())
+
+
 ###  BU KOD İLE , KOYULAN BİR KELİME SONRASI TABLODA AÇIĞA ÇIKAN YENİ KELİMELER VERİLİYOR. ###
 ###          AYNI ZAMANDA BU KELİMELERİ OLUŞTURAN HARFLERİN X VE Y KOORDİNATLARI DÖNÜLÜYOR ###
 ###                     BU KOORDİNATLAR HARF VE KELİME PUANLAMADA KULLANILACAKLAR          ###
@@ -875,6 +882,8 @@ def kelime_kontrol_final(kelime, x_koord, y_koord, orientation , board_old , har
     """
 
     
+    kelime = _normalize_input_word(kelime)
+
     x_koord1=x_koord
     y_koord1=y_koord
     jokerindis = set(jokerindis or [])
@@ -912,7 +921,7 @@ def kelime_kontrol_final(kelime, x_koord, y_koord, orientation , board_old , har
                         xler.append(x_koord)
                         harfler.append(kelime[i])
                         tam_kelime.append(kelime[i])
-                        harf_skor = 0 if i in jokerindis else harf_puanlari[kelime[i]]
+                        harf_skor = 0 if i in jokerindis else harf_puanlari.get(kelime[i], 0)
                         puan=puan+harf_skor                       
                         i += 1  # Move to the next letter in `kelime`
                     else:
@@ -982,7 +991,7 @@ def kelime_kontrol_final(kelime, x_koord, y_koord, orientation , board_old , har
                         xler.append(x_basl)
                         harfler.append(kelime[i])
                         tam_kelime.append(kelime[i])
-                        harf_skor = 0 if i in jokerindis else harf_puanlari[kelime[i]]
+                        harf_skor = 0 if i in jokerindis else harf_puanlari.get(kelime[i], 0)
                         puan=puan+harf_skor
                         i += 1  # Move to the next letter in `kelime`
                     else:
@@ -1006,11 +1015,11 @@ def kelime_kontrol_final(kelime, x_koord, y_koord, orientation , board_old , har
             y_koord += 1            
         olusan_kelimeler.append(kelime)
         
-    puanlardizisi.append(sum((0 if i in jokerindis else harf_puanlari[a]) for i, a in enumerate(kelime)))
+    puanlardizisi.append(sum((0 if i in jokerindis else harf_puanlari.get(a, 0)) for i, a in enumerate(kelime)))
     
     
     carpan=1
-    kelime_deger=sum((0 if i in jokerindis else harf_puanlari[a]) for i, a in enumerate(kelime))
+    kelime_deger=sum((0 if i in jokerindis else harf_puanlari.get(a, 0)) for i, a in enumerate(kelime))
     alternatif_kelimeler_puan=0
     if orientation=="h" or orientation=="H":
         for q,a in enumerate(kelime):
@@ -1029,7 +1038,7 @@ def kelime_kontrol_final(kelime, x_koord, y_koord, orientation , board_old , har
                     alternatif_kelimeler_puan=alternatif_kelimeler_puan
                 #tahta_puanlari2[y_koord1,x_koord1]=0
             elif tahta_puanlari2[y_koord1,x_koord1]==3:
-                harf_baz = 0 if q in jokerindis else harf_puanlari[a]
+                harf_baz = 0 if q in jokerindis else harf_puanlari.get(a, 0)
                 kelime_deger=kelime_deger+harf_baz*2
                 if len(str(olusan_kelimeler[q]))!=1:     #EĞER KOYULAN HARF , TEK HARFLİ ALTERNATİF KELİME OLARAK YER ALMIYORSA
                     alternatif_kelimeler_puan=alternatif_kelimeler_puan+puanlardizisi[q]+harf_baz*2
@@ -1037,7 +1046,7 @@ def kelime_kontrol_final(kelime, x_koord, y_koord, orientation , board_old , har
                     alternatif_kelimeler_puan=alternatif_kelimeler_puan
                 #tahta_puanlari2[y_koord1,x_koord1]=0
             elif tahta_puanlari2[y_koord1,x_koord1]==2:
-                harf_baz = 0 if q in jokerindis else harf_puanlari[a]
+                harf_baz = 0 if q in jokerindis else harf_puanlari.get(a, 0)
                 kelime_deger=kelime_deger+harf_baz*1
                 if len(str(olusan_kelimeler[q]))!=1:     #EĞER KOYULAN HARF , TEK HARFLİ ALTERNATİF KELİME OLARAK YER ALMIYORSA
                     alternatif_kelimeler_puan=alternatif_kelimeler_puan+puanlardizisi[q]+harf_baz*1
@@ -1084,7 +1093,7 @@ def kelime_kontrol_final(kelime, x_koord, y_koord, orientation , board_old , har
                     alternatif_kelimeler_puan=alternatif_kelimeler_puan
                 #tahta_puanlari2[y_koord1,x_koord1]=0
             elif tahta_puanlari2[y_koord1,x_koord1]==3:
-                harf_baz = 0 if q in jokerindis else harf_puanlari[a]
+                harf_baz = 0 if q in jokerindis else harf_puanlari.get(a, 0)
                 kelime_deger=kelime_deger+harf_baz*2
                 if len(str(olusan_kelimeler[q]))!=1:     #EĞER KOYULAN HARF , TEK HARFLİ ALTERNATİF KELİME OLARAK YER ALMIYORSA
                     alternatif_kelimeler_puan=alternatif_kelimeler_puan+puanlardizisi[q]+harf_baz*2
@@ -1092,7 +1101,7 @@ def kelime_kontrol_final(kelime, x_koord, y_koord, orientation , board_old , har
                     alternatif_kelimeler_puan=alternatif_kelimeler_puan
                 #tahta_puanlari2[y_koord1,x_koord1]=0
             elif tahta_puanlari2[y_koord1,x_koord1]==2:
-                harf_baz = 0 if q in jokerindis else harf_puanlari[a]
+                harf_baz = 0 if q in jokerindis else harf_puanlari.get(a, 0)
                 kelime_deger=kelime_deger+harf_baz*1
                 if len(str(olusan_kelimeler[q]))!=1:     #EĞER KOYULAN HARF , TEK HARFLİ ALTERNATİF KELİME OLARAK YER ALMIYORSA
                     alternatif_kelimeler_puan=alternatif_kelimeler_puan+puanlardizisi[q]+harf_baz*1
@@ -1720,7 +1729,7 @@ def kelime_yerlestir_ve_puanla4(kelime, x_koord, y_koord, orientation, board, ta
     
     # Orijinal kelime ve uzunluğunu sakla
     orijinal_kelime = kelime
-    orijinal_uzunluk = len(kelime)
+    orijinal_uzunluk = len(orijinal_kelime)
 
     # --- ORIENTATION NORMALİZASYONU ---
     ori = str(orientation).strip().lower()
@@ -2040,7 +2049,7 @@ def kelime_yerlestir_ve_puanla5(kelime, x_koord, y_koord, orientation, board, ta
         'Y': 3, 'Z': 4
     }
 
-    orijinal_kelime = kelime
+    orijinal_kelime = _normalize_input_word(kelime)
     orijinal_uzunluk = len(kelime)
 
     
