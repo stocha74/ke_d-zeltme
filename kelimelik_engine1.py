@@ -1229,9 +1229,9 @@ def kelime_yerlestir_ve_puanla(kelime, x_koord, y_koord, orientation, board,taht
         "kelimeler": olusan_kelimeler,
         "kelime_durumlari": kelime_durumlari,
         "puan": toplam_puan,
-        "oynanan_kelime_gosterim": _format_played_word_with_jokers(orijinal_kelime, stokindis[:len(orijinal_kelime)], joker_stok_indisleri),
+        "oynanan_kelime_gosterim": _normalize_input_word(kelime),
         "board": board,
-        "stoktan_dus": [(f"JOKER->{h}" if i in joker_stok_indisleri else h) for i, h in enumerate(stoktan_dus)],
+        "stoktan_dus": stoktan_dus,
         "yeni_tahta_puanlari": tahta_puanlari2,
         "gecerli": olusan_kelimeler_sozlukte_var_mi
     }
