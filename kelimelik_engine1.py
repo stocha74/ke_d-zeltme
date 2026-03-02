@@ -1229,8 +1229,9 @@ def kelime_yerlestir_ve_puanla(kelime, x_koord, y_koord, orientation, board,taht
         "kelimeler": olusan_kelimeler,
         "kelime_durumlari": kelime_durumlari,
         "puan": toplam_puan,
+        "oynanan_kelime_gosterim": _format_played_word_with_jokers(orijinal_kelime, stokindis[:len(orijinal_kelime)], joker_stok_indisleri),
         "board": board,
-        "stoktan_dus": [("JOKER" if i in joker_stok_indisleri else h) for i, h in enumerate(stoktan_dus)],
+        "stoktan_dus": [(f"JOKER->{h}" if i in joker_stok_indisleri else h) for i, h in enumerate(stoktan_dus)],
         "yeni_tahta_puanlari": tahta_puanlari2,
         "gecerli": olusan_kelimeler_sozlukte_var_mi
     }
@@ -1433,6 +1434,25 @@ def aday_kelime_yerlestir(tahta, aday_kelime):
     return gecerli_pozisyonlar
 '''
 ###########################################################################
+
+
+
+def _format_played_word_with_jokers(orijinal_kelime, stokindis, joker_stok_indisleri):
+    """Oynanan kelimede joker ile konan harfleri *H şeklinde işaretler."""
+    out = []
+    yeni_idx = 0
+    joker_set = set(joker_stok_indisleri or [])
+    for i, ch in enumerate(orijinal_kelime):
+        up = str(ch).upper()
+        if i < len(stokindis) and stokindis[i] == "0":
+            if yeni_idx in joker_set:
+                out.append(f"*{up}")
+            else:
+                out.append(up)
+            yeni_idx += 1
+        else:
+            out.append(up)
+    return "".join(out)
 
 def _format_board_cell(cell, use_color=True):
     """Joker hücrelerini (*A) şeklinde ayırt ederek gösterir."""
@@ -1849,8 +1869,9 @@ def kelime_yerlestir_ve_puanla4(kelime, x_koord, y_koord, orientation, board, ta
         "kelimeler": olusan_kelimeler,
         "kelime_durumlari": kelime_durumlari,
         "puan": toplam_puan,
+        "oynanan_kelime_gosterim": _format_played_word_with_jokers(orijinal_kelime, stokindis[:len(orijinal_kelime)], joker_stok_indisleri),
         "board": board,
-        "stoktan_dus": [("JOKER" if i in joker_stok_indisleri else h) for i, h in enumerate(stoktan_dus)],
+        "stoktan_dus": [(f"JOKER->{h}" if i in joker_stok_indisleri else h) for i, h in enumerate(stoktan_dus)],
         "yeni_tahta_puanlari": tahta_puanlari2,
         "gecerli": olusan_kelimeler_sozlukte_var_mi
     }
@@ -2179,8 +2200,9 @@ def kelime_yerlestir_ve_puanla5(kelime, x_koord, y_koord, orientation, board, ta
         "kelimeler": olusan_kelimeler,
         "kelime_durumlari": kelime_durumlari,
         "puan": toplam_puan,
+        "oynanan_kelime_gosterim": _format_played_word_with_jokers(orijinal_kelime, stokindis[:len(orijinal_kelime)], joker_stok_indisleri),
         "board": board,
-        "stoktan_dus": [("JOKER" if i in joker_stok_indisleri else h) for i, h in enumerate(stoktan_dus)],
+        "stoktan_dus": [(f"JOKER->{h}" if i in joker_stok_indisleri else h) for i, h in enumerate(stoktan_dus)],
         "yeni_tahta_puanlari": tahta_puanlari2,
         "gecerli": olusan_kelimeler_sozlukte_var_mi,
         "dezavantaj": dezavantaj_puani
