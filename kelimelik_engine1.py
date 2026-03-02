@@ -1434,22 +1434,28 @@ def aday_kelime_yerlestir(tahta, aday_kelime):
 '''
 ###########################################################################
 
-def print_board2(board):
-    # Sütun numaralarını hizalayarak yazdırma
-    print("     " + "  ".join([f"{i:2}" for i in range(15)]))  # Sütun numaraları
-    print("   +" + "---+" * 15)
-    for y, row in enumerate(board):
-        # Satır numaraları ve her hücre için boşluk veya harf yazdırma
-        row_str = " | ".join([cell if cell else " " for cell in row])  # Boş hücreler için boşluk
-        print(f"{y:2} | {row_str} |")
-        print("   +" + "---+" * 15)
-###################################################################
+def _format_board_cell(cell, use_color=True):
+    """Joker hücrelerini (*A) şeklinde ayırt ederek gösterir."""
+    if cell == "" or cell is None:
+        return " "
+
+    if isinstance(cell, str) and cell.isalpha():
+        if _is_joker_cell(cell):
+            txt = f"*{cell.upper()}"
+            return f"\033[95m{txt}\033[0m" if use_color else txt
+
+        txt = cell.upper()
+        return f"\033[93m{txt}\033[0m" if use_color else txt
+
+    txt = str(cell)
+    return f"\033[97m{txt}\033[0m" if use_color else txt
+
 
 def print_board2(board):
     print("     " + "  ".join([f"{i:2}" for i in range(15)]))  # Sütun numaraları
     print("   +" + "---+" * 15)
     for y, row in enumerate(board):
-        row_str = " | ".join([str(cell) if cell else " " for cell in row])
+        row_str = " | ".join([_format_board_cell(cell, use_color=False) for cell in row])
         print(f"{y:2} | {row_str} |")
         print("   +" + "---+" * 15)
 ####################################################################
@@ -1458,19 +1464,9 @@ def print_board(board):
     print("     " + "  ".join([f"{i:2}" for i in range(15)]))
     print("   +" + "---+" * 15)
     for y, row in enumerate(board):
-        row_str = []
-        for cell in row:
-            if isinstance(cell, str) and cell.isalpha():
-                renkli = f"\033[93m{cell}\033[0m"  # sarı
-            elif cell:
-                renkli = f"\033[97m{cell}\033[0m"  # beyaz
-            else:
-                renkli = " "
-            row_str.append(renkli)
+        row_str = [_format_board_cell(cell, use_color=True) for cell in row]
         print(f"{y:2} | " + " | ".join(row_str) + " |")
         print("   +" + "---+" * 15)
-
-
 
 
 ##################################################
