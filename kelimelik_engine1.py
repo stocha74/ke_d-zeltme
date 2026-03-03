@@ -5,6 +5,94 @@ Created on Sat Nov  9 19:01:01 2024
 @author: Cenk Toker
 """
 
+def _normalize_cell_letter(cell):
+    if cell is None or cell == "":
+        return ""
+    return str(cell).upper()
+
+
+def _is_joker_cell(cell):
+    return isinstance(cell, str) and cell != "" and cell.islower()
+
+
+def _harf_puani_from_cell(cell, harf_puanlari):
+    ch = _normalize_cell_letter(cell)
+    if ch == "":
+        return 0
+    if _is_joker_cell(cell):
+        return 0
+    return harf_puanlari.get(ch, 0)
+
+
+def _hucre_harf_eslesiyor_mu(cell, harf):
+    return _normalize_cell_letter(cell) == str(harf).upper()
+
+
+def _parse_rack_and_jokers(eldeki_harfler):
+    from collections import Counter
+    joker_adedi = 0
+    rack_counter = Counter()
+
+    if eldeki_harfler is None:
+        return rack_counter, joker_adedi
+
+    if isinstance(eldeki_harfler, str):
+        for ch in eldeki_harfler:
+            if ch in {"?", "*", "_"}:
+                joker_adedi += 1
+            elif ch.strip():
+                rack_counter[ch.upper()] += 1
+        return rack_counter, joker_adedi
+
+    for item in eldeki_harfler:
+        t = str(item).strip()
+        tu = t.upper()
+        if tu in {"JOKER", "?", "*", "_"}:
+            joker_adedi += 1
+        elif t:
+            rack_counter[tu] += 1
+
+    return rack_counter, joker_adedi
+
+
+def _joker_indislerini_bul(stoktan_dus, eldeki_harfler):
+    rack_counter, joker_adedi = _parse_rack_and_jokers(eldeki_harfler)
+    joker_indisleri = []
+
+    for i, harf in enumerate(stoktan_dus):
+        hu = str(harf).upper()
+        if rack_counter.get(hu, 0) > 0:
+            rack_counter[hu] -= 1
+        elif joker_adedi > 0:
+            joker_adedi -= 1
+            joker_indisleri.append(i)
+        else:
+            # aday akışında bu noktaya gelinmemeli; güvenli fallback
+            pass
+
+    return set(joker_indisleri)
+
+
+def _kelime_can_be_formed_with_jokers(word, letters_counter, joker_count):
+    from collections import Counter
+    eksik = 0
+    wc = Counter(str(word).upper())
+    for ch, need in wc.items():
+        have = letters_counter.get(ch, 0)
+        if need > have:
+            eksik += (need - have)
+            if eksik > joker_count:
+                return False
+    return True
+
+
+def _normalize_input_word(word):
+    """Kullanıcı/dataset kaynaklı kelimeleri temizler (boşlukları atar, büyük harfe çevirir)."""
+    if word is None:
+        return ""
+    return "".join(ch for ch in str(word).upper() if ch.strip())
+
+
 ###  BU KOD İLE , KOYULAN BİR KELİME SONRASI TABLODA AÇIĞA ÇIKAN YENİ KELİMELER VERİLİYOR. ###
 ###          AYNI ZAMANDA BU KELİMELERİ OLUŞTURAN HARFLERİN X VE Y KOORDİNATLARI DÖNÜLÜYOR ###
 ###                     BU KOORDİNATLAR HARF VE KELİME PUANLAMADA KULLANILACAKLAR          ###
@@ -20,6 +108,7 @@ def kelime_kontrol(kelime, x_koord, y_koord, orientation , board_old , harf_puan
     
     x_koord1=x_koord
     y_koord1=y_koord
+
     if orientation=="h" or orientation=="H":
     
         i = 0  # Track position in `kelime`
@@ -520,6 +609,7 @@ def kelime_kontrol_new(kelime, x_koord, y_koord, orientation , board_old , harf_
     
     x_koord1=x_koord
     y_koord1=y_koord
+
     if orientation=="h" or orientation=="H" :
     
         i = 0  # Track position in `kelime`
@@ -565,7 +655,8 @@ def kelime_kontrol_new(kelime, x_koord, y_koord, orientation , board_old , harf_
                         xler.append(x_koord)
                         harfler.append(kelime[i])
                         tam_kelime.append(kelime[i])
-                        puan=puan+harf_puanlari[kelime[i]]
+                        harf_skor = 0 if i in jokerindis else harf_puanlari[kelime[i]]
+                        puan=puan+harf_skor
                         #puan.append(tahta_puanlari2[y_basl,x_koord])
                         i += 1  # Move to the next letter in `kelime`
                     else:
@@ -574,7 +665,7 @@ def kelime_kontrol_new(kelime, x_koord, y_koord, orientation , board_old , harf_
                         yler.append(y_basl)
                         xler.append(x_koord)
                         harfler.append(board_old[y_basl][x_koord])
-                        puan=puan+harf_puanlari[board_old[y_basl][x_koord]]
+                        puan=puan+_harf_puani_from_cell(board_old[y_basl][x_koord], harf_puanlari)
                         #puan.append(tahta_puanlari2[y_basl,x_koord])
                     y_basl += 1
 
@@ -656,7 +747,8 @@ def kelime_kontrol_new(kelime, x_koord, y_koord, orientation , board_old , harf_
                         xler.append(x_basl)
                         harfler.append(kelime[i])
                         tam_kelime.append(kelime[i])
-                        puan=puan+harf_puanlari[kelime[i]]
+                        harf_skor = 0 if i in jokerindis else harf_puanlari[kelime[i]]
+                        puan=puan+harf_skor
                         #puan.append(tahta_puanlari2[y_koord,x_basl])
                         i += 1  # Move to the next letter in `kelime`
                     else:
@@ -665,7 +757,7 @@ def kelime_kontrol_new(kelime, x_koord, y_koord, orientation , board_old , harf_
                         yler.append(y_koord)
                         xler.append(x_basl)
                         harfler.append(board_old[y_koord][x_basl])
-                        puan=puan+harf_puanlari[board_old[y_koord][x_basl]]
+                        puan=puan+_harf_puani_from_cell(board_old[y_koord][x_basl], harf_puanlari)
                     x_basl += 1
 
                 #print("Constructed letters:", tam_kelime)
@@ -714,7 +806,7 @@ def kelime_kontrol_new(kelime, x_koord, y_koord, orientation , board_old , harf_
                 ilave=ilave+puanlardizisi[b]*1
                 #tahta_puanlari2[y_koord1,x_koord1]=0
             elif tahta_puanlari2[y_koord1,x_koord1]==3:
-                ilave=ilave+harf_puanlari[a]*4
+                ilave=ilave+harf_puanlari[a]*2
                 #tahta_puanlari2[y_koord1,x_koord1]=0
             elif tahta_puanlari2[y_koord1,x_koord1]==2:
                 ilave=ilave+harf_puanlari[a]*2
@@ -746,7 +838,7 @@ def kelime_kontrol_new(kelime, x_koord, y_koord, orientation , board_old , harf_
                 ilave=ilave+puanlardizisi[b]*1
                 #tahta_puanlari2[y_koord1,x_koord1]=0
             elif tahta_puanlari2[y_koord1,x_koord1]==3:
-                ilave=ilave+harf_puanlari[a]*4
+                ilave=ilave+harf_puanlari[a]*2
                 #tahta_puanlari2[y_koord1,x_koord1]=0
             elif tahta_puanlari2[y_koord1,x_koord1]==2:
                 ilave=ilave+harf_puanlari[a]*2
@@ -781,7 +873,7 @@ def kelime_kontrol_new(kelime, x_koord, y_koord, orientation , board_old , harf_
 
 ####################################################################################
 
-def kelime_kontrol_final(kelime, x_koord, y_koord, orientation , board_old , harf_puanlari , tahta_puanlari2 , stok , stokindis):
+def kelime_kontrol_final(kelime, x_koord, y_koord, orientation , board_old , harf_puanlari , tahta_puanlari2 , stok , stokindis, jokerindis=None):
     """    
     ###  BU KOD İLE , KOYULAN BİR KELİME SONRASI TABLODA AÇIĞA ÇIKAN YENİ KELİMELER VERİLİYOR. ###
     ###          AYNI ZAMANDA BU KELİMELERİ OLUŞTURAN HARFLERİN X VE Y KOORDİNATLARI DÖNÜLÜYOR ###
@@ -790,8 +882,11 @@ def kelime_kontrol_final(kelime, x_koord, y_koord, orientation , board_old , har
     """
 
     
+    kelime = _normalize_input_word(kelime)
+
     x_koord1=x_koord
     y_koord1=y_koord
+    jokerindis = set(jokerindis or [])
     if orientation=="h" or orientation=="H":
     
         i = 0  # Track position in `kelime`
@@ -826,7 +921,8 @@ def kelime_kontrol_final(kelime, x_koord, y_koord, orientation , board_old , har
                         xler.append(x_koord)
                         harfler.append(kelime[i])
                         tam_kelime.append(kelime[i])
-                        puan=puan+harf_puanlari[kelime[i]]                       
+                        harf_skor = 0 if i in jokerindis else harf_puanlari.get(kelime[i], 0)
+                        puan=puan+harf_skor                       
                         i += 1  # Move to the next letter in `kelime`
                     else:
                         # Otherwise, use the letter from `board_old` if available
@@ -834,7 +930,7 @@ def kelime_kontrol_final(kelime, x_koord, y_koord, orientation , board_old , har
                         yler.append(y_basl)
                         xler.append(x_koord)
                         harfler.append(board_old[y_basl][x_koord])
-                        puan=puan+harf_puanlari[board_old[y_basl][x_koord]]                        
+                        puan=puan+_harf_puani_from_cell(board_old[y_basl][x_koord], harf_puanlari)                        
                     y_basl += 1
 
                 # Join the list to form the final word
@@ -895,7 +991,8 @@ def kelime_kontrol_final(kelime, x_koord, y_koord, orientation , board_old , har
                         xler.append(x_basl)
                         harfler.append(kelime[i])
                         tam_kelime.append(kelime[i])
-                        puan=puan+harf_puanlari[kelime[i]]
+                        harf_skor = 0 if i in jokerindis else harf_puanlari.get(kelime[i], 0)
+                        puan=puan+harf_skor
                         i += 1  # Move to the next letter in `kelime`
                     else:
                         # Otherwise, use the letter from `board_old` if available
@@ -903,7 +1000,7 @@ def kelime_kontrol_final(kelime, x_koord, y_koord, orientation , board_old , har
                         yler.append(y_koord)
                         xler.append(x_basl)
                         harfler.append(board_old[y_koord][x_basl])
-                        puan=puan+harf_puanlari[board_old[y_koord][x_basl]]
+                        puan=puan+_harf_puani_from_cell(board_old[y_koord][x_basl], harf_puanlari)
                     x_basl += 1
                 # Join the list to form the final word
                 word = "".join(tam_kelime)
@@ -918,11 +1015,11 @@ def kelime_kontrol_final(kelime, x_koord, y_koord, orientation , board_old , har
             y_koord += 1            
         olusan_kelimeler.append(kelime)
         
-    puanlardizisi.append(sum(harf_puanlari[a] for a in kelime))
+    puanlardizisi.append(sum((0 if i in jokerindis else harf_puanlari.get(a, 0)) for i, a in enumerate(kelime)))
     
     
     carpan=1
-    kelime_deger=sum(harf_puanlari[a] for a in kelime)
+    kelime_deger=sum((0 if i in jokerindis else harf_puanlari.get(a, 0)) for i, a in enumerate(kelime))
     alternatif_kelimeler_puan=0
     if orientation=="h" or orientation=="H":
         for q,a in enumerate(kelime):
@@ -941,16 +1038,18 @@ def kelime_kontrol_final(kelime, x_koord, y_koord, orientation , board_old , har
                     alternatif_kelimeler_puan=alternatif_kelimeler_puan
                 #tahta_puanlari2[y_koord1,x_koord1]=0
             elif tahta_puanlari2[y_koord1,x_koord1]==3:
-                kelime_deger=kelime_deger+harf_puanlari[a]*2
+                harf_baz = 0 if q in jokerindis else harf_puanlari.get(a, 0)
+                kelime_deger=kelime_deger+harf_baz*2
                 if len(str(olusan_kelimeler[q]))!=1:     #EĞER KOYULAN HARF , TEK HARFLİ ALTERNATİF KELİME OLARAK YER ALMIYORSA
-                    alternatif_kelimeler_puan=alternatif_kelimeler_puan+puanlardizisi[q]
+                    alternatif_kelimeler_puan=alternatif_kelimeler_puan+puanlardizisi[q]+harf_baz*2
                 else:    #EĞER KOYULAN HARF , TEK HARFLİ ALTERNATİF KELİME OLARAK YER ALIYORSA
                     alternatif_kelimeler_puan=alternatif_kelimeler_puan
                 #tahta_puanlari2[y_koord1,x_koord1]=0
             elif tahta_puanlari2[y_koord1,x_koord1]==2:
-                kelime_deger=kelime_deger+harf_puanlari[a]*1
+                harf_baz = 0 if q in jokerindis else harf_puanlari.get(a, 0)
+                kelime_deger=kelime_deger+harf_baz*1
                 if len(str(olusan_kelimeler[q]))!=1:     #EĞER KOYULAN HARF , TEK HARFLİ ALTERNATİF KELİME OLARAK YER ALMIYORSA
-                    alternatif_kelimeler_puan=alternatif_kelimeler_puan+puanlardizisi[q]
+                    alternatif_kelimeler_puan=alternatif_kelimeler_puan+puanlardizisi[q]+harf_baz*1
                 else:    #EĞER KOYULAN HARF , TEK HARFLİ ALTERNATİF KELİME OLARAK YER ALIYORSA
                     alternatif_kelimeler_puan=alternatif_kelimeler_puan
                 #tahta_puanlari2[y_koord1,x_koord1]=0
@@ -994,16 +1093,18 @@ def kelime_kontrol_final(kelime, x_koord, y_koord, orientation , board_old , har
                     alternatif_kelimeler_puan=alternatif_kelimeler_puan
                 #tahta_puanlari2[y_koord1,x_koord1]=0
             elif tahta_puanlari2[y_koord1,x_koord1]==3:
-                kelime_deger=kelime_deger+harf_puanlari[a]*2
+                harf_baz = 0 if q in jokerindis else harf_puanlari.get(a, 0)
+                kelime_deger=kelime_deger+harf_baz*2
                 if len(str(olusan_kelimeler[q]))!=1:     #EĞER KOYULAN HARF , TEK HARFLİ ALTERNATİF KELİME OLARAK YER ALMIYORSA
-                    alternatif_kelimeler_puan=alternatif_kelimeler_puan+puanlardizisi[q]
+                    alternatif_kelimeler_puan=alternatif_kelimeler_puan+puanlardizisi[q]+harf_baz*2
                 else:    #EĞER KOYULAN HARF , TEK HARFLİ ALTERNATİF KELİME OLARAK YER ALIYORSA
                     alternatif_kelimeler_puan=alternatif_kelimeler_puan
                 #tahta_puanlari2[y_koord1,x_koord1]=0
             elif tahta_puanlari2[y_koord1,x_koord1]==2:
-                kelime_deger=kelime_deger+harf_puanlari[a]*1
+                harf_baz = 0 if q in jokerindis else harf_puanlari.get(a, 0)
+                kelime_deger=kelime_deger+harf_baz*1
                 if len(str(olusan_kelimeler[q]))!=1:     #EĞER KOYULAN HARF , TEK HARFLİ ALTERNATİF KELİME OLARAK YER ALMIYORSA
-                    alternatif_kelimeler_puan=alternatif_kelimeler_puan+puanlardizisi[q]
+                    alternatif_kelimeler_puan=alternatif_kelimeler_puan+puanlardizisi[q]+harf_baz*1
                 else:    #EĞER KOYULAN HARF , TEK HARFLİ ALTERNATİF KELİME OLARAK YER ALIYORSA
                     alternatif_kelimeler_puan=alternatif_kelimeler_puan
                 #tahta_puanlari2[y_koord1,x_koord1]=0
@@ -1092,7 +1193,7 @@ def kelime_yerlestir_ve_puanla(kelime, x_koord, y_koord, orientation, board,taht
         if board[y][x] == "":
             stoktan_dus.append(harf)
             stokindis.append("0")
-        elif board[y][x] == harf:
+        elif _hucre_harf_eslesiyor_mu(board[y][x], harf):
             stokindis.append("1")
         else:
             return 2  # çakışma var
@@ -1128,6 +1229,7 @@ def kelime_yerlestir_ve_puanla(kelime, x_koord, y_koord, orientation, board,taht
         "kelimeler": olusan_kelimeler,
         "kelime_durumlari": kelime_durumlari,
         "puan": toplam_puan,
+        "oynanan_kelime_gosterim": _normalize_input_word(kelime),
         "board": board,
         "stoktan_dus": stoktan_dus,
         "yeni_tahta_puanlari": tahta_puanlari2,
@@ -1333,22 +1435,47 @@ def aday_kelime_yerlestir(tahta, aday_kelime):
 '''
 ###########################################################################
 
-def print_board2(board):
-    # Sütun numaralarını hizalayarak yazdırma
-    print("     " + "  ".join([f"{i:2}" for i in range(15)]))  # Sütun numaraları
-    print("   +" + "---+" * 15)
-    for y, row in enumerate(board):
-        # Satır numaraları ve her hücre için boşluk veya harf yazdırma
-        row_str = " | ".join([cell if cell else " " for cell in row])  # Boş hücreler için boşluk
-        print(f"{y:2} | {row_str} |")
-        print("   +" + "---+" * 15)
-###################################################################
+
+
+def _format_played_word_with_jokers(orijinal_kelime, stokindis, joker_stok_indisleri):
+    """Oynanan kelimede joker ile konan harfleri *H şeklinde işaretler."""
+    out = []
+    yeni_idx = 0
+    joker_set = set(joker_stok_indisleri or [])
+    for i, ch in enumerate(orijinal_kelime):
+        up = str(ch).upper()
+        if i < len(stokindis) and stokindis[i] == "0":
+            if yeni_idx in joker_set:
+                out.append(f"*{up}")
+            else:
+                out.append(up)
+            yeni_idx += 1
+        else:
+            out.append(up)
+    return "".join(out)
+
+def _format_board_cell(cell, use_color=True):
+    """Joker hücrelerini (*A) şeklinde ayırt ederek gösterir."""
+    if cell == "" or cell is None:
+        return " "
+
+    if isinstance(cell, str) and cell.isalpha():
+        if _is_joker_cell(cell):
+            txt = f"*{cell.upper()}"
+            return f"\033[95m{txt}\033[0m" if use_color else txt
+
+        txt = cell.upper()
+        return f"\033[93m{txt}\033[0m" if use_color else txt
+
+    txt = str(cell)
+    return f"\033[97m{txt}\033[0m" if use_color else txt
+
 
 def print_board2(board):
     print("     " + "  ".join([f"{i:2}" for i in range(15)]))  # Sütun numaraları
     print("   +" + "---+" * 15)
     for y, row in enumerate(board):
-        row_str = " | ".join([str(cell) if cell else " " for cell in row])
+        row_str = " | ".join([_format_board_cell(cell, use_color=False) for cell in row])
         print(f"{y:2} | {row_str} |")
         print("   +" + "---+" * 15)
 ####################################################################
@@ -1357,19 +1484,9 @@ def print_board(board):
     print("     " + "  ".join([f"{i:2}" for i in range(15)]))
     print("   +" + "---+" * 15)
     for y, row in enumerate(board):
-        row_str = []
-        for cell in row:
-            if isinstance(cell, str) and cell.isalpha():
-                renkli = f"\033[93m{cell}\033[0m"  # sarı
-            elif cell:
-                renkli = f"\033[97m{cell}\033[0m"  # beyaz
-            else:
-                renkli = " "
-            row_str.append(renkli)
+        row_str = [_format_board_cell(cell, use_color=True) for cell in row]
         print(f"{y:2} | " + " | ".join(row_str) + " |")
         print("   +" + "---+" * 15)
-
-
 
 
 ##################################################
@@ -1392,7 +1509,7 @@ def extract_words(board):
             if board[y, x] != '':
                 if word == '':
                     start_x = x
-                word += board[y, x]
+                word += _normalize_cell_letter(board[y, x])
             else:
                 if len(word) >= 1:
                     words.append((word, (start_x, y), 'horizontal'))
@@ -1409,7 +1526,7 @@ def extract_words(board):
             if board[y, x] != '':
                 if word == '':
                     start_y = y
-                word += board[y, x]
+                word += _normalize_cell_letter(board[y, x])
             else:
                 if len(word) >= 1:
                     words.append((word, (x, start_y), 'vertical'))
@@ -1541,17 +1658,19 @@ def find_possible_words_and_orientations2(available_letters, word_parts, diction
 from itertools import permutations
 
 def find_valid_words_from_available_with_orientations(available_letters, dictionary):
+    from collections import Counter
     valid_words = set()
-    available_letters = available_letters.upper()
-    dictionary_set = {word.upper() for word in dictionary}
 
-    # 2 harften başlayarak 7 harfe kadar olan tüm permütasyonları deniyoruz
-    for length in range(2, len(available_letters) + 1):
-        for p in permutations(available_letters, length):
-            word = ''.join(p)
-            if word in dictionary_set:
-                valid_words.add((word, "horizontal"))
-                valid_words.add((word, "vertical"))
+    rack_counter, joker_count = _parse_rack_and_jokers(available_letters)
+    max_len = sum(rack_counter.values()) + joker_count
+
+    for word in dictionary:
+        w = str(word).upper()
+        if len(w) < 2 or len(w) > max_len:
+            continue
+        if _kelime_can_be_formed_with_jokers(w, rack_counter, joker_count):
+            valid_words.add((w, "horizontal"))
+            valid_words.add((w, "vertical"))
 
     return sorted(valid_words)
 
@@ -1583,7 +1702,7 @@ def aday_kelime_yerlestir(tahta, aday_kelimeler):
                     ty = y + (i if yon == 'vertical' else 0)
 
                     if tahta[ty][tx] != '':
-                        if tahta[ty][tx] != kelime[i]:
+                        if not _hucre_harf_eslesiyor_mu(tahta[ty][tx], kelime[i]):
                             cakisma_var = True
                             break
                         cakisamayan_harfler += 1
@@ -1626,7 +1745,7 @@ def kelime_yerlestir_ve_puanla4(kelime, x_koord, y_koord, orientation, board, ta
     
     # Orijinal kelime ve uzunluğunu sakla
     orijinal_kelime = kelime
-    orijinal_uzunluk = len(kelime)
+    orijinal_uzunluk = len(orijinal_kelime)
 
     # --- ORIENTATION NORMALİZASYONU ---
     ori = str(orientation).strip().lower()
@@ -1662,7 +1781,7 @@ def kelime_yerlestir_ve_puanla4(kelime, x_koord, y_koord, orientation, board, ta
         if board[y][x] == "":
             stoktan_dus.append(harf)
             stokindis.append("0")
-        elif board[y][x] == harf:
+        elif _hucre_harf_eslesiyor_mu(board[y][x], harf):
             stokindis.append("1")
         else:
             return 2  # çakışma var
@@ -1677,9 +1796,16 @@ def kelime_yerlestir_ve_puanla4(kelime, x_koord, y_koord, orientation, board, ta
 
     # --- Harfleri geçici olarak board'a yerleştir ---
     x, y = x_koord, y_koord
+    yeni_harf_sayac = 0
+    joker_tam_kelime_indisleri = set()
     for i, harf in enumerate(orijinal_kelime):
         if stokindis[i] == "0":
-            board[y][x] = harf
+            if yeni_harf_sayac in joker_stok_indisleri:
+                board[y][x] = str(harf).lower()
+                joker_tam_kelime_indisleri.add(i)
+            else:
+                board[y][x] = harf
+            yeni_harf_sayac += 1
         if yatay_mi:
             x += 1
         else:
@@ -1690,13 +1816,13 @@ def kelime_yerlestir_ve_puanla4(kelime, x_koord, y_koord, orientation, board, ta
     if yatay_mi:
         x_bas = x_koord - 1
         while x_bas >= 0 and board[y_koord][x_bas] != "":
-            on_ek.insert(0, board[y_koord][x_bas])
+            on_ek.insert(0, _normalize_cell_letter(board[y_koord][x_bas]))
             stokindis.insert(0, "1")
             x_bas -= 1
     else:
         y_bas = y_koord - 1
         while y_bas >= 0 and board[y_bas][x_koord] != "":
-            on_ek.insert(0, board[y_bas][x_koord])
+            on_ek.insert(0, _normalize_cell_letter(board[y_bas][x_koord]))
             stokindis.insert(0, "1")
             y_bas -= 1
 
@@ -1705,13 +1831,13 @@ def kelime_yerlestir_ve_puanla4(kelime, x_koord, y_koord, orientation, board, ta
     if yatay_mi:
         x_end = x_koord + orijinal_uzunluk
         while x_end < 15 and board[y_koord][x_end] != "":
-            son_ek.append(board[y_koord][x_end])
+            son_ek.append(_normalize_cell_letter(board[y_koord][x_end]))
             stokindis.append("1")
             x_end += 1
     else:
         y_end = y_koord + orijinal_uzunluk
         while y_end < 15 and board[y_end][x_koord] != "":
-            son_ek.append(board[y_end][x_koord])
+            son_ek.append(_normalize_cell_letter(board[y_end][x_koord]))
             stokindis.append("1")
             y_end += 1
 
@@ -1743,8 +1869,9 @@ def kelime_yerlestir_ve_puanla4(kelime, x_koord, y_koord, orientation, board, ta
         "kelimeler": olusan_kelimeler,
         "kelime_durumlari": kelime_durumlari,
         "puan": toplam_puan,
+        "oynanan_kelime_gosterim": _format_played_word_with_jokers(orijinal_kelime, stokindis[:len(orijinal_kelime)], joker_stok_indisleri),
         "board": board,
-        "stoktan_dus": stoktan_dus,
+        "stoktan_dus": [(f"JOKER->{h}" if i in joker_stok_indisleri else h) for i, h in enumerate(stoktan_dus)],
         "yeni_tahta_puanlari": tahta_puanlari2,
         "gecerli": olusan_kelimeler_sozlukte_var_mi
     }
@@ -1801,59 +1928,49 @@ from collections import Counter
 def find_possible_words_and_orientations4(available_letters, word_parts, dictionary, board_size=15):
     """
     Verilen kelimeciği tahtadaki konumunda sabit tutarak, başına ve/veya sonuna
-    eldeki harfleri ekleyerek sözlükteki geçerli kelimeleri üretir.
+    eldeki harfleri (JOKER dahil) ekleyerek sözlükteki geçerli kelimeleri üretir.
 
     Sadece tahtanın içinde kalan yerleşimler geçerli sayılır.
     """
+    from collections import Counter
 
     possible_words = set()
-    available_counts = Counter(available_letters)
-    dictionary = {word for word in dictionary}
+    dictionary = [str(word).upper() for word in dictionary]
+    rack_counter, joker_count = _parse_rack_and_jokers(available_letters)
 
     for part, (x_pos, y_pos), orientation in word_parts:
-        max_extra_letters = len(available_letters)
+        part_u = str(part).upper()
 
-        for pre_len in range(max_extra_letters + 1):
-            for pre in permutations(available_letters, pre_len):
-                pre_counter = Counter(pre)
-                if not pre_counter <= available_counts:
-                    continue
+        for candidate in dictionary:
+            if candidate == part_u:
+                continue
 
-                remaining = list((available_counts - pre_counter).elements())
+            idx = candidate.find(part_u)
+            while idx != -1:
+                pre = candidate[:idx]
+                post = candidate[idx + len(part_u):]
+                needed = pre + post
 
-                for post_len in range(max_extra_letters - pre_len + 1):
-                    for post in permutations(remaining, post_len):
-                        post_counter = Counter(post)
-                        total_counter = pre_counter + post_counter
+                if _kelime_can_be_formed_with_jokers(needed, rack_counter, joker_count):
+                    if orientation == 'horizontal':
+                        start_x = x_pos - len(pre)
+                        start_y = y_pos
+                        end_x = start_x + len(candidate) - 1
+                        end_y = start_y
+                    else:
+                        start_x = x_pos
+                        start_y = y_pos - len(pre)
+                        end_x = start_x
+                        end_y = start_y + len(candidate) - 1
 
-                        if not total_counter <= available_counts:
-                            continue
+                    if 0 <= start_x < board_size and 0 <= start_y < board_size and                        0 <= end_x < board_size and 0 <= end_y < board_size:
+                        possible_words.add((candidate, (start_x, start_y), orientation))
 
-                        candidate = ''.join(pre) + part + ''.join(post)
-                        word_len = len(candidate)
+                idx = candidate.find(part_u, idx + 1)
 
-                        if candidate != part and candidate in dictionary:
-                            # Kelimenin tahtadaki başlangıcı
-                            if orientation == 'horizontal':
-                                start_x = x_pos - len(pre)
-                                start_y = y_pos
-                                end_x = start_x + word_len - 1
-                                end_y = start_y
-                            else:
-                                start_x = x_pos
-                                start_y = y_pos - len(pre)
-                                end_x = start_x
-                                end_y = start_y + word_len - 1
-
-                            # Tahta sınır kontrolü
-                            if 0 <= start_x <= 14 and 0 <= start_y <= 14 and \
-                               0 <= end_x <= 14 and 0 <= end_y <= 14:
-                                possible_words.add((candidate, (start_x, start_y), orientation))
-
-        # Tek harfli part doğrudan sözlükteyse, ve tahtada sınırdaysa alınır
-        if len(part) == 1 and part in dictionary:
-            if 0 <= x_pos <= 14 and 0 <= y_pos <= 14:
-                possible_words.add((part, (x_pos, y_pos), orientation))
+        if len(part_u) == 1 and part_u in dictionary:
+            if 0 <= x_pos < board_size and 0 <= y_pos < board_size:
+                possible_words.add((part_u, (x_pos, y_pos), orientation))
 
     return sorted(possible_words, key=lambda x: (x[2], x[0]))
 
@@ -1885,7 +2002,7 @@ def aday_kelime_yerlestir2(tahta, aday_kelimeler):
                     ty = y + (i if yon == 'vertical' else 0)
 
                     if tahta[ty][tx] != '':
-                        if tahta[ty][tx] != kelime[i]:
+                        if not _hucre_harf_eslesiyor_mu(tahta[ty][tx], kelime[i]):
                             cakisma_var = True
                             break
                         cakisamayan_harfler += 1
@@ -1939,7 +2056,7 @@ def hesapla_dezavantaj_puani(board, yeni_harf_koordinatlari, tahta_puanlari2):
                     dezavantaj += 2
     return dezavantaj
 ##############################################################################
-def kelime_yerlestir_ve_puanla5(kelime, x_koord, y_koord, orientation, board, tahta_puanlari2, sozluk):
+def kelime_yerlestir_ve_puanla5(kelime, x_koord, y_koord, orientation, board, tahta_puanlari2, sozluk, eldeki_harfler=None):
     import copy
     board_old = copy.deepcopy(board)
     harf_puanlari = {
@@ -1949,7 +2066,7 @@ def kelime_yerlestir_ve_puanla5(kelime, x_koord, y_koord, orientation, board, ta
         'Y': 3, 'Z': 4
     }
 
-    orijinal_kelime = kelime
+    orijinal_kelime = _normalize_input_word(kelime)
     orijinal_uzunluk = len(kelime)
 
     
@@ -1986,7 +2103,7 @@ def kelime_yerlestir_ve_puanla5(kelime, x_koord, y_koord, orientation, board, ta
         if board[y][x] == "":
             stoktan_dus.append(harf)
             stokindis.append("0")
-        elif board[y][x] == harf:
+        elif _hucre_harf_eslesiyor_mu(board[y][x], harf):
             stokindis.append("1")
         else:
             return 2
@@ -1998,10 +2115,19 @@ def kelime_yerlestir_ve_puanla5(kelime, x_koord, y_koord, orientation, board, ta
     if not stoktan_dus:
         return 4
 
+    joker_stok_indisleri = _joker_indislerini_bul(stoktan_dus, eldeki_harfler)
+
     x, y = x_koord, y_koord
+    yeni_harf_sayac = 0
+    joker_tam_kelime_indisleri = set()
     for i, harf in enumerate(orijinal_kelime):
         if stokindis[i] == "0":
-            board[y][x] = harf
+            if yeni_harf_sayac in joker_stok_indisleri:
+                board[y][x] = str(harf).lower()
+                joker_tam_kelime_indisleri.add(i)
+            else:
+                board[y][x] = harf
+            yeni_harf_sayac += 1
         if yatay_mi:
             x += 1
         else:
@@ -2011,13 +2137,13 @@ def kelime_yerlestir_ve_puanla5(kelime, x_koord, y_koord, orientation, board, ta
     if yatay_mi:
         x_bas = x_koord - 1
         while x_bas >= 0 and board[y_koord][x_bas] != "":
-            on_ek.insert(0, board[y_koord][x_bas])
+            on_ek.insert(0, _normalize_cell_letter(board[y_koord][x_bas]))
             stokindis.insert(0, "1")
             x_bas -= 1
     else:
         y_bas = y_koord - 1
         while y_bas >= 0 and board[y_bas][x_koord] != "":
-            on_ek.insert(0, board[y_bas][x_koord])
+            on_ek.insert(0, _normalize_cell_letter(board[y_bas][x_koord]))
             stokindis.insert(0, "1")
             y_bas -= 1
 
@@ -2025,13 +2151,13 @@ def kelime_yerlestir_ve_puanla5(kelime, x_koord, y_koord, orientation, board, ta
     if yatay_mi:
         x_end = x_koord + orijinal_uzunluk
         while x_end < 15 and board[y_koord][x_end] != "":
-            son_ek.append(board[y_koord][x_end])
+            son_ek.append(_normalize_cell_letter(board[y_koord][x_end]))
             stokindis.append("1")
             x_end += 1
     else:
         y_end = y_koord + orijinal_uzunluk
         while y_end < 15 and board[y_end][x_koord] != "":
-            son_ek.append(board[y_end][x_koord])
+            son_ek.append(_normalize_cell_letter(board[y_end][x_koord]))
             stokindis.append("1")
             y_end += 1
 
@@ -2044,11 +2170,16 @@ def kelime_yerlestir_ve_puanla5(kelime, x_koord, y_koord, orientation, board, ta
         x_koord_updated = x_koord
         y_koord_updated = y_koord - len(on_ek)
 
+    joker_tam_kelime_indisleri = {idx + len(on_ek) for idx in joker_tam_kelime_indisleri}
+
     olusan_kelimeler, puanlardizisi, toplam_puan, tahta_puanlari2 = kelime_kontrol_final(
-        tam_kelime, x_koord_updated, y_koord_updated, orientation, board_old, harf_puanlari, tahta_puanlari2, stoktan_dus, stokindis
+        tam_kelime, x_koord_updated, y_koord_updated, orientation, board_old, harf_puanlari, tahta_puanlari2, stoktan_dus, stokindis, jokerindis=joker_tam_kelime_indisleri
     )
 
-    kelime_durumlari = [(k, k in sozluk) for k in olusan_kelimeler]
+    if len(stoktan_dus) == 7:
+        toplam_puan += 35
+
+    kelime_durumlari = [(_normalize_cell_letter(k), _normalize_cell_letter(k) in sozluk) for k in olusan_kelimeler]
     olusan_kelimeler_sozlukte_var_mi = all(durum for (_, durum) in kelime_durumlari)
 
     # --- DEZAVANTAJ PUANI HESABI ---
@@ -2069,8 +2200,9 @@ def kelime_yerlestir_ve_puanla5(kelime, x_koord, y_koord, orientation, board, ta
         "kelimeler": olusan_kelimeler,
         "kelime_durumlari": kelime_durumlari,
         "puan": toplam_puan,
+        "oynanan_kelime_gosterim": _format_played_word_with_jokers(orijinal_kelime, stokindis[:len(orijinal_kelime)], joker_stok_indisleri),
         "board": board,
-        "stoktan_dus": stoktan_dus,
+        "stoktan_dus": [(f"JOKER->{h}" if i in joker_stok_indisleri else h) for i, h in enumerate(stoktan_dus)],
         "yeni_tahta_puanlari": tahta_puanlari2,
         "gecerli": olusan_kelimeler_sozlukte_var_mi,
         "dezavantaj": dezavantaj_puani
