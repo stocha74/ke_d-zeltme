@@ -2778,7 +2778,8 @@ def hamle_cok_kriterli(board, tahta_puanlari2, eldeki_harfler, sozluk2,
     for kelime, (x_koord, y_koord), orient in mumkun_kelimeler:
         cikti = ke.kelime_yerlestir_ve_puanla5(
             kelime.upper(), x_koord, y_koord, orient,
-            board_temp, yeni_tahta_puanlari, sozluk2, eldeki_harfler=eldeki_harfler
+            board_temp, yeni_tahta_puanlari, sozluk2,
+            eldeki_harfler=eldeki_harfler
         )
         if not isinstance(cikti, dict):
             board_temp = copy.deepcopy(board)
@@ -2826,7 +2827,7 @@ def hamle_cok_kriterli(board, tahta_puanlari2, eldeki_harfler, sozluk2,
     # 5) Tahtaya yerleştir
     _ = ke.kelime_yerlestir_ve_puanla(
         secilen_kelime.upper(), secilen_x, secilen_y, secilen_orient,
-        board, yeni_tahta_puanlari, sozluk2, eldeki_harfler=eldeki_harfler
+        board, yeni_tahta_puanlari, sozluk2
     )
 
     # 6) ana_dizin'i kompozit skora göre sıralayıp döndür (yapıyı bozmadan)
@@ -2847,7 +2848,8 @@ def hamle_cok_kriterli(board, tahta_puanlari2, eldeki_harfler, sozluk2,
     # Tekrar hesapla (sadece seçilen için) ki kullanilan_max'ı döndürebilelim:
     tmp = ke.kelime_yerlestir_ve_puanla5(
         secilen_kelime.upper(), secilen_x, secilen_y, secilen_orient,
-        copy.deepcopy(board), yeni_tahta_puanlari, sozluk2, eldeki_harfler=eldeki_harfler
+        copy.deepcopy(board), yeni_tahta_puanlari, sozluk2,
+        eldeki_harfler=eldeki_harfler
     )
     if isinstance(tmp, dict) and "stoktan_dus" in tmp:
         kullanilan_max = tmp["stoktan_dus"]
@@ -2912,7 +2914,8 @@ def hamle_cok_kriterli(board, tahta_puanlari2, eldeki_harfler, sozluk2,
     for kelime, (x_koord, y_koord), orient in mumkun_kelimeler:
         cikti = ke.kelime_yerlestir_ve_puanla5(
             kelime.upper(), x_koord, y_koord, orient,
-            board_temp, yeni_tahta_puanlari, sozluk2, eldeki_harfler=eldeki_harfler
+            board_temp, yeni_tahta_puanlari, sozluk2,
+            eldeki_harfler=eldeki_harfler
         )
         if not isinstance(cikti, dict):
             board_temp = copy.deepcopy(board); continue
@@ -2971,7 +2974,7 @@ def hamle_cok_kriterli(board, tahta_puanlari2, eldeki_harfler, sozluk2,
     # 5) Seçimi tahtaya uygula
     _ = ke.kelime_yerlestir_ve_puanla(
         secilen_kelime.upper(), secilen_x, secilen_y, secilen_orient,
-        board, yeni_tahta_puanlari, sozluk2, eldeki_harfler=eldeki_harfler
+        board, yeni_tahta_puanlari, sozluk2
     )
 
     # 6) ana_dizin’i sırala ve döndür
@@ -3050,7 +3053,8 @@ def hamle_cok_kriterli(board, tahta_puanlari2, eldeki_harfler, sozluk2,
     for kelime, (x_koord, y_koord), orient in mumkun_kelimeler:
         cikti = ke.kelime_yerlestir_ve_puanla5(
             kelime.upper(), x_koord, y_koord, orient,
-            board_temp, yeni_tahta_puanlari, sozluk2, eldeki_harfler=eldeki_harfler
+            board_temp, yeni_tahta_puanlari, sozluk2,
+            eldeki_harfler=eldeki_harfler
         )
         if not isinstance(cikti, dict):
             board_temp = copy.deepcopy(board)
@@ -3114,7 +3118,7 @@ def hamle_cok_kriterli(board, tahta_puanlari2, eldeki_harfler, sozluk2,
     # 5) Seçimi tahtaya uygula
     _ = ke.kelime_yerlestir_ve_puanla(
         secilen_kelime.upper(), secilen_x, secilen_y, secilen_orient,
-        board, yeni_tahta_puanlari, sozluk2, eldeki_harfler=eldeki_harfler
+        board, yeni_tahta_puanlari, sozluk2
     )
 
     # 6) ana_dizin’i kompozit skora göre sırala ve döndür
@@ -3195,7 +3199,8 @@ def hamle_cok_kriterli(board, tahta_puanlari2, eldeki_harfler, sozluk2,
     for kelime, (x_koord, y_koord), orient in mumkun_kelimeler:
         cikti = ke.kelime_yerlestir_ve_puanla5(
             kelime.upper(), x_koord, y_koord, orient,
-            board_temp, yeni_tahta_puanlari, sozluk2, eldeki_harfler=eldeki_harfler
+            board_temp, yeni_tahta_puanlari, sozluk2,
+            eldeki_harfler=eldeki_harfler
         )
         if not isinstance(cikti, dict):
             board_temp = copy.deepcopy(board)
@@ -3246,7 +3251,8 @@ def hamle_cok_kriterli(board, tahta_puanlari2, eldeki_harfler, sozluk2,
     temp_multipliers[board != ''] = 0
     tmp = ke.kelime_yerlestir_ve_puanla5(
         secilen_kelime.upper(), secilen_x, secilen_y, secilen_orient,
-        temp_board, temp_multipliers, sozluk2, eldeki_harfler=eldeki_harfler
+        temp_board, temp_multipliers, sozluk2,
+        eldeki_harfler=eldeki_harfler
     )
     if isinstance(tmp, dict) and "stoktan_dus" in tmp and tmp["stoktan_dus"]:
         # stoktan_dus bazen str/np.array olabilir -> listeye çevir
@@ -3279,7 +3285,7 @@ def hamle_cok_kriterli(board, tahta_puanlari2, eldeki_harfler, sozluk2,
     # 6) Seçimi gerçek tahtaya uygula
     _ = ke.kelime_yerlestir_ve_puanla(
         secilen_kelime.upper(), secilen_x, secilen_y, secilen_orient,
-        board, yeni_tahta_puanlari, sozluk2, eldeki_harfler=eldeki_harfler
+        board, yeni_tahta_puanlari, sozluk2
     )
 
     # 7) ana_dizin’i kompozit skora göre sırala ve döndür
@@ -3360,7 +3366,8 @@ def hamle_cok_kriterli(board, tahta_puanlari2, eldeki_harfler, sozluk2,
     for kelime, (x_koord, y_koord), orient in mumkun_kelimeler:
         cikti = ke.kelime_yerlestir_ve_puanla5(
             kelime.upper(), x_koord, y_koord, orient,
-            board_temp, yeni_tahta_puanlari, sozluk2, eldeki_harfler=eldeki_harfler
+            board_temp, yeni_tahta_puanlari, sozluk2,
+            eldeki_harfler=eldeki_harfler
         )
         if not isinstance(cikti, dict):
             board_temp = copy.deepcopy(board)
@@ -3412,7 +3419,8 @@ def hamle_cok_kriterli(board, tahta_puanlari2, eldeki_harfler, sozluk2,
     temp_mult[board != ''] = 0
     tmp = ke.kelime_yerlestir_ve_puanla5(
         secilen_kelime.upper(), secilen_x, secilen_y, secilen_orient,
-        temp_board, temp_mult, sozluk2, eldeki_harfler=eldeki_harfler
+        temp_board, temp_mult, sozluk2,
+        eldeki_harfler=eldeki_harfler
     )
     kullanilan_max = []
     if isinstance(tmp, dict) and "stoktan_dus" in tmp:
@@ -3451,7 +3459,7 @@ def hamle_cok_kriterli(board, tahta_puanlari2, eldeki_harfler, sozluk2,
     # 6) Seçimi gerçek tahtaya uygula
     _ = ke.kelime_yerlestir_ve_puanla(
         secilen_kelime.upper(), secilen_x, secilen_y, secilen_orient,
-        board, yeni_tahta_puanlari, sozluk2, eldeki_harfler=eldeki_harfler
+        board, yeni_tahta_puanlari, sozluk2
     )
 
     # 7) ana_dizin’i kompozit skora göre sırala ve döndür
@@ -3539,7 +3547,8 @@ def hamle_cok_kriterli_eski2(board, tahta_puanlari2, eldeki_harfler, sozluk2,
     for kelime, (x_koord, y_koord), orient in mumkun_kelimeler:
         cikti = ke.kelime_yerlestir_ve_puanla5(
             kelime.upper(), x_koord, y_koord, orient,
-            board_temp, yeni_tahta_puanlari, sozluk2, eldeki_harfler=eldeki_harfler
+            board_temp, yeni_tahta_puanlari, sozluk2,
+            eldeki_harfler=eldeki_harfler
         )
         if not isinstance(cikti, dict):
             board_temp = copy.deepcopy(board)
@@ -3584,13 +3593,14 @@ def hamle_cok_kriterli_eski2(board, tahta_puanlari2, eldeki_harfler, sozluk2,
 
     tmp = ke.kelime_yerlestir_ve_puanla5(
         secilen_kelime.upper(), secilen_x, secilen_y, secilen_orient,
-        copy.deepcopy(board), yeni_tahta_puanlari, sozluk2, eldeki_harfler=eldeki_harfler
+        copy.deepcopy(board), yeni_tahta_puanlari, sozluk2,
+        eldeki_harfler=eldeki_harfler
     )
     kullanilan_max = tmp.get("stoktan_dus", []) if isinstance(tmp, dict) else []
 
     _ = ke.kelime_yerlestir_ve_puanla(
         secilen_kelime.upper(), secilen_x, secilen_y, secilen_orient,
-        board, yeni_tahta_puanlari, sozluk2, eldeki_harfler=eldeki_harfler
+        board, yeni_tahta_puanlari, sozluk2
     )
 
     ana_dizin = list(zip(
@@ -3739,7 +3749,8 @@ def hamle_cok_kriterli_eski(board, tahta_puanlari2, eldeki_harfler, sozluk2,
     for kelime, (x_koord, y_koord), orient in mumkun_kelimeler:
         cikti = ke.kelime_yerlestir_ve_puanla5(
             kelime.upper(), x_koord, y_koord, orient,
-            board_temp, yeni_tahta_puanlari, sozluk2, eldeki_harfler=eldeki_harfler
+            board_temp, yeni_tahta_puanlari, sozluk2,
+            eldeki_harfler=eldeki_harfler
         )
         if not isinstance(cikti, dict):
             continue
@@ -3781,13 +3792,14 @@ def hamle_cok_kriterli_eski(board, tahta_puanlari2, eldeki_harfler, sozluk2,
 
     tmp = ke.kelime_yerlestir_ve_puanla5(
         secilen_kelime.upper(), secilen_x, secilen_y, secilen_orient,
-        copy.deepcopy(board), yeni_tahta_puanlari, sozluk2, eldeki_harfler=eldeki_harfler
+        copy.deepcopy(board), yeni_tahta_puanlari, sozluk2,
+        eldeki_harfler=eldeki_harfler
     )
     kullanilan_max = tmp.get("stoktan_dus", []) if isinstance(tmp, dict) else []
 
     _ = ke.kelime_yerlestir_ve_puanla(
         secilen_kelime.upper(), secilen_x, secilen_y, secilen_orient,
-        board, yeni_tahta_puanlari, sozluk2, eldeki_harfler=eldeki_harfler
+        board, yeni_tahta_puanlari, sozluk2
     )
 
     ana_dizin = list(zip(
@@ -3900,7 +3912,8 @@ def hamle_cok_kriterli_simdilik_eski_ama_emektar(board, tahta_puanlari2, eldeki_
         
         cikti = ke.kelime_yerlestir_ve_puanla5(
             kelime.upper(), x_koord, y_koord, orient_hv,
-            board_temp, yeni_tahta_puanlari, sozluk2, eldeki_harfler=eldeki_harfler
+            board_temp, yeni_tahta_puanlari, sozluk2,
+            eldeki_harfler=eldeki_harfler
         )
         if not isinstance(cikti, dict):
             board_temp = copy.deepcopy(board)
@@ -3969,13 +3982,14 @@ def hamle_cok_kriterli_simdilik_eski_ama_emektar(board, tahta_puanlari2, eldeki_
     # Engine içindeki aynı akış (stoktan düşecek harfleri almak için)
     tmp = ke.kelime_yerlestir_ve_puanla5(
         secilen_kelime.upper(), secilen_x, secilen_y, secilen_orient,
-        copy.deepcopy(board), yeni_tahta_puanlari, sozluk2, eldeki_harfler=eldeki_harfler
+        copy.deepcopy(board), yeni_tahta_puanlari, sozluk2,
+        eldeki_harfler=eldeki_harfler
     )
     kullanilan_max = tmp.get("stoktan_dus", []) if isinstance(tmp, dict) else []
 
     _ = ke.kelime_yerlestir_ve_puanla(
         secilen_kelime.upper(), secilen_x, secilen_y, secilen_orient,
-        board, yeni_tahta_puanlari, sozluk2, eldeki_harfler=eldeki_harfler
+        board, yeni_tahta_puanlari, sozluk2
     )
 
     ana_dizin = list(zip(
@@ -4112,7 +4126,8 @@ def hamle_cok_kriterli(board, tahta_puanlari2, eldeki_harfler, sozluk2,
 
         cikti = ke.kelime_yerlestir_ve_puanla5(
             kelime.upper(), x_koord, y_koord, orient_hv,
-            board_temp, yeni_tahta_puanlari, sozluk2, eldeki_harfler=eldeki_harfler
+            board_temp, yeni_tahta_puanlari, sozluk2,
+            eldeki_harfler=eldeki_harfler
         )
 
         if not isinstance(cikti, dict):
@@ -4181,13 +4196,14 @@ def hamle_cok_kriterli(board, tahta_puanlari2, eldeki_harfler, sozluk2,
     # --- 6) Stoktan düşecek harfleri almak için (senin mevcut akışını koruyoruz) ---
     tmp = ke.kelime_yerlestir_ve_puanla5(
         secilen_kelime.upper(), secilen_x, secilen_y, secilen_orient,
-        copy.deepcopy(board), yeni_tahta_puanlari, sozluk2, eldeki_harfler=eldeki_harfler
+        copy.deepcopy(board), yeni_tahta_puanlari, sozluk2,
+        eldeki_harfler=eldeki_harfler
     )
     kullanilan_max = tmp.get("stoktan_dus", []) if isinstance(tmp, dict) else []
 
     _ = ke.kelime_yerlestir_ve_puanla(
         secilen_kelime.upper(), secilen_x, secilen_y, secilen_orient,
-        board, yeni_tahta_puanlari, sozluk2, eldeki_harfler=eldeki_harfler
+        board, yeni_tahta_puanlari, sozluk2
     )
 
     # --- 7) ana_dizin (senin format) ---
